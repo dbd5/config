@@ -217,9 +217,13 @@ class Manager extends Component implements BootstrapInterface
     {
         $this->normalizeItems();
         $items = [];
+
         foreach ($this->_items as $id => $item) {
-            $items[] = $this->getItem($id);
+            if (($itemR = $this->getItem($id))!==null) {
+                $items[] = $itemR;
+            };
         }
+
         return $items;
     }
 
@@ -232,8 +236,13 @@ class Manager extends Component implements BootstrapInterface
     {
         $this->normalizeItems();
         if (!array_key_exists($id, $this->_items)) {
-            throw new InvalidParamException("Unknown config item '{$id}'.");
+            if ($this->ignoreConfigureError) {
+                return null;
+            } else {
+                throw new InvalidParamException("Unknown config item '{$id}'.");
+            }
         }
+
         if (!is_object($this->_items[$id])) {
             $this->_items[$id] = $this->createItem($id, $this->_items[$id]);
         }
@@ -290,9 +299,11 @@ class Manager extends Component implements BootstrapInterface
     public function setItemValues(array $itemValues)
     {
         foreach ($itemValues as $id => $value) {
-            $item = $this->getItem($id);
-            $item->value = $value;
+            if (($item = $this->getItem($id))!==null) {
+                $item->value = $value;
+            };
         }
+
         return $this;
     }
 
@@ -316,8 +327,11 @@ class Manager extends Component implements BootstrapInterface
      */
     public function getItemValue($id)
     {
-        $item = $this->getItem($id);
-        return $item->getValue();
+        if (($item = $this->getItem($id))!==null) {
+            return $item->getValue();
+        };
+
+        return null;
     }
 
     /**
